@@ -1,0 +1,16 @@
+# Source code of third-party libraries
+third-party
+
+# VS Code configs
+.vscode
+
+# Prerequisites
+*.d
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Bazel temp files
+bazel-*
