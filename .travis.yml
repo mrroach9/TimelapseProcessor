@@ -1,0 +1,16 @@
+language: cpp
+compiler: clang
+
+install:
+  - choco install bazel
+
+matrix:
+  include:
+    - name: build
+      os: windows
+      script: cd core && bazel build ...
+    - name: test
+      os: windows
+      script: cd core && bazel test ...
+
+
