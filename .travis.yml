@@ -3,6 +3,9 @@ compiler: clang
 
 install:
   - choco install bazel
+    choco install visualstudio2019community
+    choco install visualstudio2019-workload-nativedesktop
+    export VS160COMNTOOLS="/c/Program Files (x86)/Microsoft Visual Studio/2019/Community/Common7/Tools"
 
 matrix:
   include:
