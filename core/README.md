@@ -1,5 +1,7 @@
 # Timelapse Processor Core Library
 
+[![Build Status](https://travis-ci.org/mrroach9/TimelapseProcessor.svg?branch=master)](https://travis-ci.org/mrroach9/TimelapseProcessor)
+
 This folder contains the C++ backend of the timelapse preprocessor, with all
 the core algorithm on rendering, image processing, video exporting. This library
 (shall) interact with frontend app via NAPI.
