@@ -4,7 +4,9 @@ cc_library(
     name = "models",
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
-    deps = [],
+    deps = [
+      "//libs/opencv-4.4.0:opencv",
+    ],
 )
 
 cc_test(

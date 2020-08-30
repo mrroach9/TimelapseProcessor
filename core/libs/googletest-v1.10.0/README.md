@@ -16,7 +16,7 @@ First run the following commands:
     git clone https://github.com/google/googletest.git
     mkdir build && cd build
     mkdir out
-    cmake ../ -Dgtest_force_shared_crt=ON -DCMAKE_INSTALL_PREFIX="./out"
+    cmake ../ -DCMAKE_INSTALL_PREFIX="./out"
 
 Then if you're building on...
 ### Windows

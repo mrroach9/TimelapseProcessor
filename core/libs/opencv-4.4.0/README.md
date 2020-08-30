@@ -15,7 +15,7 @@ First run the following commands:
 
     git clone https://github.com/google/googletest.git
     mkdir build && cd build
-    cmake ../ -DBUILD_SHARED_LIBS=OFF
+    cmake ../ -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_SHARED_LIBS=OFF
 
 Then if you're building on...
 ### Windows
