@@ -1,10 +1,11 @@
 #pragma once
 
+#include <models/TypeTraits.h>
+
 #include <filesystem>
 #include <set>
 
 namespace tlp {
-namespace fs = std::filesystem;
 
 enum class OutputFormat {
   H264_1080P,

@@ -6,12 +6,16 @@ cc_library(
     hdrs = glob(["*.h"]),
     deps = [
       "//libs/opencv-4.4.0:opencv",
+      "//libs/rapidjson-1.1.0:rapidjson",
     ],
 )
 
 cc_test(
-    name = "project_test",
-    srcs = ["tests/ProjectTest.cpp"],
+    name = "model_serialization_tests",
+    srcs = [
+      "tests/ProjectTest.cpp",
+      "tests/ImageTest.cpp",
+    ],
     deps = [
       ":models",
       "//libs/googletest-v1.10.0:googletest",

@@ -1,15 +1,15 @@
 #pragma once
 
+#include <models/TypeTraits.h>
+
 #include <chrono>
 #include <filesystem>
 #include <string>
 
 #include <opencv2/core/mat.hpp>
+#include <rapidjson/document.h>
 
 namespace tlp {
-namespace fs = std::filesystem;
-namespace chr = std::chrono;
-using TimePoint = chr::system_clock::time_point;
 
 struct ImageMetadata {
   size_t width;
@@ -22,14 +22,20 @@ struct ImageMetadata {
   int iso;
   double fStop;
 
-  std::string toJson() const;
-  static ImageMetadata fromJson(const std::string& json);
+  rapidjson::Value toJson(JsonAlloc& allocator) const;
+  static ImageMetadata fromJson(const rapidjson::Value& json);
 };
 
 class Image {
 public:
-  std::string toJson() const;
-  static Image fromJson(const std::string& json);
+  // TODO: Delete these explicit constructors when parsing feature is added. Temporarily
+  // added for testing purpose.
+  Image(const fs::path& path, const cv::Mat& alignHomo, const ImageMetadata& metadata):
+      _filepath(path), _alignHomo(alignHomo), _metadata(metadata) {}
+  Image() {}
+
+  rapidjson::Value toJson(JsonAlloc& allocator) const;
+  static Image fromJson(const rapidjson::Value& json);
 
 private:
   fs::path _filepath;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <models/Image.h>
+#include <models/TypeTraits.h>
 
 #include <opencv2/core/types.hpp>
  
@@ -10,8 +11,6 @@
 #include <vector>
 
 namespace tlp {
-namespace chr = std::chrono;
-using TimePoint = chr::system_clock::time_point;
 
 enum class InterpMethod {
   NO_INTERP,
