@@ -61,4 +61,15 @@ std::string toString(const rapidjson::Value& d, bool pretty) {
   }
   return buffer.GetString();
 }
+
+rapidjson::Value rect2dToJson(const cv::Rect2d& rect, JsonAlloc& allocator) {
+  rapidjson::Value val;
+  val.SetArray()
+      .PushBack(rect.x, allocator)
+      .PushBack(rect.y, allocator)
+      .PushBack(rect.width, allocator)
+      .PushBack(rect.height, allocator);
+  return val;
+}
+
 }

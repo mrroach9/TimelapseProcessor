@@ -30,14 +30,18 @@ class Image {
 public:
   // TODO: Delete these explicit constructors when parsing feature is added. Temporarily
   // added for testing purpose.
-  Image(const fs::path& path, const cv::Mat& alignHomo, const ImageMetadata& metadata):
-      _filepath(path), _alignHomo(alignHomo), _metadata(metadata) {}
+  Image(size_t imageId, const fs::path& path, const cv::Mat& alignHomo,
+      const ImageMetadata& metadata):
+      _imageId(imageId), _filepath(path), _alignHomo(alignHomo), _metadata(metadata) {}
   Image() {}
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
   static Image fromJson(const rapidjson::Value& json);
 
+  fs::path filepath() const;
+
 private:
+  size_t _imageId;
   fs::path _filepath;
   // Homography transformation matrix for aligning images.
   cv::Mat _alignHomo;

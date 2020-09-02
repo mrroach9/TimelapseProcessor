@@ -1,8 +1,11 @@
 #pragma once
 
+#include <models/Image.h>
+#include <models/Timeline.h>
 #include <models/TypeTraits.h>
 
 #include <filesystem>
+#include <map>
 #include <set>
 
 namespace tlp {
@@ -18,7 +21,8 @@ public:
   static Project fromJson(const std::string& json);
 
 private:
-  std::set<fs::path> _inputImages;
+  std::map<size_t, Image> _imagesById;
+  Timeline _timeline;
   std::string _projectName;
   OutputFormat _outputFormat;
 };

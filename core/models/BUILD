@@ -13,8 +13,9 @@ cc_library(
 cc_test(
     name = "model_serialization_tests",
     srcs = [
-      "tests/ProjectTest.cpp",
       "tests/ImageTest.cpp",
+      "tests/ProjectTest.cpp",
+      "tests/TimelineTest.cpp",
     ],
     deps = [
       ":models",

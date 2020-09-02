@@ -1,23 +1,54 @@
 #include <models/Timeline.h>
 
+#include <models/Utils.h>
+
 namespace tlp {
 
-std::string Keyframe::toJson() const {
-  // TODO: Implement this.
-  return "Keyframe";
+rapidjson::Value::StringRefType toStringRef(InterpMethod m) {
+  switch (m) {
+    case InterpMethod::NO_INTERP:
+      return "NO_INTERP";
+    case InterpMethod::LINEAR:
+      return "LINEAR";
+    case InterpMethod::QUADRATIC:
+      return "QUADRATIC";
+    case InterpMethod::CUBIC:
+      return "CUBIC";
+    default:
+      // Unreachable.
+      assert(false);
+      return "Unknown";
+  }
 }
 
-Keyframe Keyframe::fromJson(const std::string& json) {
+rapidjson::Value Keyframe::toJson(JsonAlloc& allocator) const {
+  rapidjson::Value val;
+  val.SetObject()
+      .AddMember("ref_image_id", _refImageId, allocator)
+      .AddMember("crop_rect", rect2dToJson(_cropRect, allocator), allocator)
+      .AddMember("ev_delta", _evDelta, allocator)
+      .AddMember("interp_method", toStringRef(_interpMethod), allocator);
+  return val;
+}
+
+Keyframe Keyframe::fromJson(const rapidjson::Value& json) {
   // TODO: Implement this.
   return Keyframe();
 }
 
-std::string Timeline::toJson() const {
-  // TODO: Implement this.
-  return "Timeline";
+rapidjson::Value Timeline::toJson(JsonAlloc& allocator) const {
+  rapidjson::Value keyframesJson;
+  keyframesJson.SetArray();
+  for (const auto [t, kf] : _keyframes) {
+    keyframesJson.PushBack(kf.toJson(allocator), allocator);
+  }
+
+  rapidjson::Value val;
+  val.SetObject().AddMember("keyframes", keyframesJson, allocator);
+  return val;
 }
 
-Timeline Timeline::fromJson(const std::string& json) {
+Timeline Timeline::fromJson(const rapidjson::Value& json) {
   // TODO: Implement this.
   return Timeline();
 }

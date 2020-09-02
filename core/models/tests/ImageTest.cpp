@@ -7,8 +7,6 @@
 #include <gtest/gtest.h>
 #include <opencv2/core/mat.hpp>
 
-#include <iostream>
-
 using namespace tlp;
 
 TEST(ImageTest, toJson) {
@@ -23,10 +21,11 @@ TEST(ImageTest, toJson) {
   meta.fStop = 5.6;
 
   cv::Mat homo = cv::Mat::eye(3, 3, CV_32F);
-  Image image("C:\\Test Path\\test image.jpg", homo, meta);
+  Image image(123, "C:\\Test Path\\test image.jpg", homo, meta);
   rapidjson::Document d;
   EXPECT_EQ(toString(image.toJson(d.GetAllocator()), true),
 R"Delim({
+    "id": 123,
     "filepath": "C:\\Test Path\\test image.jpg",
     "align_homo": [
         [

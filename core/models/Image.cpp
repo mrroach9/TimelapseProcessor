@@ -30,6 +30,7 @@ ImageMetadata ImageMetadata::fromJson(const rapidjson::Value& json) {
 rapidjson::Value Image::toJson(JsonAlloc& allocator) const {
   rapidjson::Value val;
   val.SetObject()
+      .AddMember("id", _imageId, allocator)
       .AddMember("filepath", toStringRef(_filepath), allocator)
       .AddMember("align_homo", mat3dToJson(_alignHomo, allocator), allocator)
       .AddMember("metadata", _metadata.toJson(allocator), allocator);
@@ -39,6 +40,10 @@ rapidjson::Value Image::toJson(JsonAlloc& allocator) const {
 Image Image::fromJson(const rapidjson::Value& json) {
   // TODO: implement this.
   return Image();
+}
+
+fs::path Image::filepath() const {
+  return _filepath;
 }
 
 }
