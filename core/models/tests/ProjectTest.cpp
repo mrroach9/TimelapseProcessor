@@ -71,7 +71,7 @@ R"Delim({
     "images": [
         {
             "id": 0,
-            "filepath": "C:\\Test Path\\image2.jpg",
+            "filepath": "C:\\Test Path\\image1.jpg",
             "align_homo": [
                 [
                     1.0,

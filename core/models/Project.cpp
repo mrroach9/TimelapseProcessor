@@ -43,7 +43,7 @@ Project::Project(const std::string& name,
     _timeline(timeline) {
   for (const Image& image : images) {
     _imagesById[image.id()] = image;
-    _imagesByFilepath[image.filepath().string()] = image;
+    _imagesByFilepath[image.filepath()] = image;
   }
 }
 

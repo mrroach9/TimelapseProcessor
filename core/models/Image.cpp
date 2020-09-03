@@ -42,7 +42,7 @@ Image Image::fromJson(const rapidjson::Value& json) {
   return Image();
 }
 
-fs::path Image::filepath() const {
+std::string Image::filepath() const {
   return _filepath;
 }
 

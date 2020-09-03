@@ -4,8 +4,6 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
-#include <iostream>
-
 namespace tlp {
 
 rapidjson::Value mat3dToJson(const cv::Mat& mat, JsonAlloc& allocator) {
@@ -30,12 +28,6 @@ cv::Mat mat3dFromJson(const rapidjson::Value& json) {
 
 rapidjson::Value::StringRefType toStringRef(const std::string& str) {
   return rapidjson::StringRef(str.c_str());
-}
-
-rapidjson::Value::StringRefType toStringRef(const fs::path& path) {
-  // TODO: This only works for ASCII-based path, need to convert to UTF-8
-  // when path contains non-ASCII chars and uses wstring() under Windows.
-  return toStringRef(path.string());
 }
 
 std::string toString(const rapidjson::Document& d, bool pretty) {
