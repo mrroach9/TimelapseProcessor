@@ -4,6 +4,7 @@
 #include <models/TypeTraits.h>
 
 #include <opencv2/core/types.hpp>
+#include <rapidjson/document.h>
  
 #include <chrono>
 #include <map>
@@ -69,6 +70,8 @@ private:
   // must reference to an input image, hence timestamp must be identical to 
   // an element in _images.
   std::map<TimePoint, Keyframe> _keyframes;
+  // Cached all images by ids. The groundtruth should still be in Project.
+  std::map<size_t, Image> _imagesById;
 };
 
 }

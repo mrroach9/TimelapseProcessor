@@ -39,6 +39,7 @@ public:
   static Image fromJson(const rapidjson::Value& json);
 
   fs::path filepath() const;
+  size_t id() const;
 
 private:
   size_t _imageId;

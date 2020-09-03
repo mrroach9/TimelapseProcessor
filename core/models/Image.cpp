@@ -46,4 +46,8 @@ fs::path Image::filepath() const {
   return _filepath;
 }
 
+size_t Image::id() const {
+  return _imageId;
+}
+
 }
