@@ -56,4 +56,7 @@ R"Delim({
         "f_stop": 5.6
     }
 })Delim");
+
+  const auto maybeOut = Image::fromJson(json);
+  EXPECT_EQ(maybeOut.value(), image);
 }

@@ -5,3 +5,9 @@ cc_library(
     hdrs = ["Error.h"],
     deps = [],
 )
+
+cc_library(
+    name = "math",
+    hdrs = ["Math.h"],
+    deps = [],
+)

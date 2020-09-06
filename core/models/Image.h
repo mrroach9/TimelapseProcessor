@@ -28,6 +28,8 @@ struct ImageMetadata {
   static tl::expected<ImageMetadata, Error> fromJson(const rapidjson::Value& json);
 };
 
+bool operator==(const ImageMetadata& a, const ImageMetadata& b);
+
 class Image {
 public:
   // TODO: Delete these explicit constructors when parsing feature is added. Temporarily
@@ -43,6 +45,8 @@ public:
   std::string filepath() const;
   size_t id() const;
 
+  friend bool operator==(const Image& a, const Image &b);
+
 private:
   size_t _imageId;
   // UTF-8 encoded bytestreams of filepaths. (Currently only supporting ASCII-chars).
@@ -52,5 +56,7 @@ private:
   // Image metadata extracted from image EXIF data or file header.
   ImageMetadata _metadata;
 };
+
+bool operator==(const Image& a, const Image &b);
 
 }

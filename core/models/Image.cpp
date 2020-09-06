@@ -1,5 +1,6 @@
 #include <models/Image.h>
 
+#include <common/Math.h>
 #include <models/Utils.h>
 
 #include <chrono>
@@ -99,6 +100,17 @@ tl::expected<ImageMetadata, Error> ImageMetadata::fromJson(const rapidjson::Valu
   return meta;
 }
 
+bool operator==(const ImageMetadata& a, const ImageMetadata& b) {
+  return a.width == b.width
+      && a.height == b.height
+      && a.bitDepth == b.bitDepth
+      && a.nChannel == b.nChannel
+      && a.timestamp == b.timestamp
+      && a.exposureUs == b.exposureUs
+      && a.iso == b.iso
+      && double_eq(a.fStop, b.fStop);
+}
+
 rapidjson::Value Image::toJson(JsonAlloc& allocator) const {
   rapidjson::Value val;
   val.SetObject()
@@ -171,6 +183,14 @@ std::string Image::filepath() const {
 
 size_t Image::id() const {
   return _imageId;
+}
+
+bool operator==(const Image& a, const Image &b) {
+  return a._imageId == b._imageId
+      && a._filepath == b._filepath
+      && std::equal(a._alignHomo.begin<double>(), a._alignHomo.end<double>(),
+                    b._alignHomo.begin<double>(), double_eq)
+      && a._metadata == b._metadata;
 }
 
 }
