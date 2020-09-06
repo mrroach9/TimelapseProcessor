@@ -25,12 +25,10 @@ enum class VideoResolution {
 };
 
 rapidjson::Value::StringRefType toStringRef(VideoEncoding o);
-tl::expected<VideoEncoding, Error> videoEncodingfromStringRef(
-    const rapidjson::Value::StringRefType& str);
+tl::expected<VideoEncoding, Error> videoEncodingfromString(const std::string& str);
 
 rapidjson::Value::StringRefType toStringRef(VideoResolution o);
-tl::expected<VideoResolution, Error> videoResolutionfromStringRef(
-    const rapidjson::Value::StringRefType& str);
+tl::expected<VideoResolution, Error> videoResolutionfromString(const std::string& str);
 
 class Project {
 public:

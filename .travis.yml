@@ -15,5 +15,3 @@ matrix:
     - name: test
       os: windows
       script: cd core && bazel test ... --test_output=all
-
-

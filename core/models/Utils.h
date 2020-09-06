@@ -20,6 +20,8 @@ rapidjson::Value::StringRefType toStringRef(const std::string& str);
 
 rapidjson::Value rect2dToJson(const cv::Rect2d& rect, JsonAlloc& allocator);
 
+tl::expected<cv::Rect2d, Error> rect2dFromJson(const rapidjson::Value& json);
+
 std::string toString(const rapidjson::Document& d, bool pretty = false);
 
 std::string toString(const rapidjson::Value& d, bool pretty = false);
@@ -27,4 +29,9 @@ std::string toString(const rapidjson::Value& d, bool pretty = false);
 tl::expected<size_t, Error> getUintFromJsonChild(
     const rapidjson::Value& json,
     const std::string& fieldName);
+
+tl::expected<std::vector<double>, Error> getDoubleArrayFromJson(
+    const rapidjson::Value& json,
+    size_t size);
+
 }

@@ -21,8 +21,7 @@ rapidjson::Value::StringRefType toStringRef(InterpMethod m) {
   }
 }
 
-tl::expected<InterpMethod, Error> interpMethodFromStringRef(
-    const rapidjson::Value::StringRefType& str) {
+tl::expected<InterpMethod, Error> interpMethodFromString(const std::string& str) {
   if (str == "NO_INTERP") {
     return InterpMethod::NO_INTERP;
   } else if (str == "LINEAR") {
@@ -48,9 +47,65 @@ rapidjson::Value Keyframe::toJson(JsonAlloc& allocator) const {
   return val;
 }
 
-Keyframe Keyframe::fromJson(const rapidjson::Value& json) {
-  // TODO: Implement this.
-  return Keyframe();
+tl::expected<Keyframe, Error> Keyframe::fromJson(const rapidjson::Value& json) {
+  Keyframe keyframe;
+  if (!json.IsObject()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "Keyframe JSON node is not an object!"});
+  }
+
+  const auto maybeId = getUintFromJsonChild(json, "ref_image_id");
+  if (!maybeId) {
+    return tl::unexpected(maybeId.error());
+  } else {
+    keyframe._refImageId = maybeId.value();
+  }
+
+  if (json.HasMember("crop_rect")) {
+    const auto maybeCropRect = rect2dFromJson(json["crop_rect"]);
+    if (maybeCropRect) {
+      keyframe._cropRect = maybeCropRect.value();
+    } else {
+      return tl::unexpected(maybeCropRect.error());
+    }
+  } else {
+    return tl::unexpected(Error{
+          ErrorCode::JSON_MISSING_FIELD, "crop_rect field is missing!"
+    });
+  }
+
+  if (json.HasMember("ev_delta")) {
+    const auto& evDeltaJson = json["ev_delta"];
+    if (evDeltaJson.IsDouble()) {
+      keyframe._evDelta = evDeltaJson.GetDouble();
+    } else {
+      return tl::unexpected(Error{
+          ErrorCode::JSON_WRONG_NODE_TYPE, "ev_delta is not a double!"});
+    }
+  } else {
+    return tl::unexpected(Error{
+          ErrorCode::JSON_MISSING_FIELD, "ev_delta field is missing!"
+    });
+  }
+
+  if (json.HasMember("interp_method")) {
+    const auto& interpMethodJson = json["interp_method"];
+    if (!interpMethodJson.IsString()) {
+      return tl::unexpected(Error{
+          ErrorCode::JSON_WRONG_NODE_TYPE, "interp_method is not a string!"});
+    }
+    const auto maybeInterpMethod = interpMethodFromString(interpMethodJson.GetString());
+    if (maybeInterpMethod) {
+      keyframe._interpMethod = maybeInterpMethod.value();
+    } else {
+      return tl::unexpected(maybeInterpMethod.error());
+    }
+  } else {
+    return tl::unexpected(Error{
+          ErrorCode::JSON_MISSING_FIELD, "interp_method field is missing!"
+    });
+  }
+  return keyframe;
 }
 
 bool operator==(const Keyframe& a, const Keyframe& b) {
@@ -66,7 +121,7 @@ bool operator==(const Keyframe& a, const Keyframe& b) {
 rapidjson::Value Timeline::toJson(JsonAlloc& allocator) const {
   rapidjson::Value keyframesJson;
   keyframesJson.SetArray();
-  for (const auto [t, kf] : _keyframes) {
+  for (const auto& kf : _keyframes) {
     keyframesJson.PushBack(kf.toJson(allocator), allocator);
   }
 
@@ -75,9 +130,27 @@ rapidjson::Value Timeline::toJson(JsonAlloc& allocator) const {
   return val;
 }
 
-Timeline Timeline::fromJson(const rapidjson::Value& json) {
-  // TODO: Implement this.
-  return Timeline();
+tl::expected<Timeline, Error> Timeline::fromJson(const rapidjson::Value& json) {
+  Timeline tl;
+  if (!json.IsObject()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "Timeline JSON node is not an object!"});
+  } else if (!json.HasMember("keyframes")) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_MISSING_FIELD, "keyframes field is missing!"});
+  } else if (!json["keyframes"].IsArray()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "keyframe is not an array!"});
+  }
+  for (const auto& keyframeJson : json["keyframes"].GetArray()) {
+    const auto maybeKeyframe = Keyframe::fromJson(keyframeJson);
+    if (maybeKeyframe) {
+      tl._keyframes.push_back(maybeKeyframe.value());
+    } else {
+      return tl::unexpected(maybeKeyframe.error());
+    }
+  }
+  return tl;
 }
 
 int Timeline::addImages(const std::vector<Image>& images) {
@@ -96,8 +169,7 @@ int Timeline::addKeyframe(const Keyframe& keyframe) {
 }
 
 bool operator==(const Timeline& a, const Timeline& b) {
-  return std::equal(a._keyframes.begin(), a._keyframes.end(), b._keyframes.begin())
-      && std::equal(a._imagesById.begin(), a._imagesById.end(), b._imagesById.begin());
+  return std::equal(a._keyframes.begin(), a._keyframes.end(), b._keyframes.begin());
 }
 
 }

@@ -16,8 +16,7 @@ rapidjson::Value::StringRefType toStringRef(VideoEncoding o) {
   }
 }
 
-tl::expected<VideoEncoding, Error> videoEncodingfromStringRef(
-    const rapidjson::Value::StringRefType& str) {
+tl::expected<VideoEncoding, Error> videoEncodingfromString(const std::string& str) {
   if (str == "H264") {
     return VideoEncoding::H264;
   } else if (str == "SEQ_OF_IMAGES") {
@@ -45,8 +44,7 @@ rapidjson::Value::StringRefType toStringRef(VideoResolution o) {
   }
 }
 
-tl::expected<VideoResolution, Error> videoResolutionfromStringRef(
-    const rapidjson::Value::StringRefType& str) {
+tl::expected<VideoResolution, Error> videoResolutionfromString(const std::string& str) {
   if (str == "480p") {
     return VideoResolution::RES_480P;
   } else if (str == "720p") {

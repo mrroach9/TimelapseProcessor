@@ -23,8 +23,7 @@ enum class InterpMethod {
 };
 
 rapidjson::Value::StringRefType toStringRef(InterpMethod m);
-tl::expected<InterpMethod, Error> interpMethodFromStringRef(
-    const rapidjson::Value::StringRefType& str);
+tl::expected<InterpMethod, Error> interpMethodFromString(const std::string& str);
 
 class Keyframe {
 public:
@@ -41,7 +40,7 @@ public:
   Keyframe() {}
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
-  static Keyframe fromJson(const rapidjson::Value& json);
+  static tl::expected<Keyframe, Error> fromJson(const rapidjson::Value& json);
 
   friend bool operator==(const Keyframe& a, const Keyframe& b);
 
@@ -60,11 +59,11 @@ class Timeline {
 public:
   // TODO: Delete these explicit constructors when parsing feature is added. Temporarily
   // added for testing purpose.
-  Timeline(const std::map<TimePoint, Keyframe>& keyframes) : _keyframes(keyframes) {}
+  Timeline(const std::vector<Keyframe>& keyframes) : _keyframes(keyframes) {}
   Timeline() {}
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
-  static Timeline fromJson(const rapidjson::Value& json);
+  static tl::expected<Timeline, Error> fromJson(const rapidjson::Value& json);
 
   int addImages(const std::vector<Image>& images);
   int addKeyframes(const std::vector<Keyframe>& keyframes);
@@ -73,13 +72,18 @@ public:
   friend bool operator==(const Timeline& a, const Timeline& b);
 
 private:
+  // A list of keyframes in this timeline. This is the only field serialized in the class.
+  std::vector<Keyframe> _keyframes;
+
+  // Temporary indices:
+
   // A list of all imported images IDs keyed by their real time of shooting extracted
   // from EXIF.
   std::map<TimePoint, size_t> _imageIdsByTime;
   // A list of all keyframes keyed by their timestamp. Note that each keyframe
   // must reference to an input image, hence timestamp must be identical to 
   // an element in _images.
-  std::map<TimePoint, Keyframe> _keyframes;
+  std::map<TimePoint, Keyframe> _keyframesByTime;
   // Cached all images by ids. The groundtruth should still be in Project.
   std::map<size_t, Image> _imagesById;
 };

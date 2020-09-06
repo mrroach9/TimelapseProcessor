@@ -32,25 +32,13 @@ tl::expected<cv::Mat, Error> mat3dFromJson(const rapidjson::Value& json) {
         ErrorCode::JSON_ARRAY_WRONG_SIZE, "Array is not of size 3!"});
   }
   for (size_t r = 0; r < 3; ++r) {
-    const rapidjson::Value& rowJson = json[r];
-    if (!rowJson.IsArray()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE,
-          "Element #" + std::to_string(r) + " of array node is not an array!"});
-    } else if (rowJson.Size() != 3) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_ARRAY_WRONG_SIZE,
-          "Element #" + std::to_string(r) + " of array node is not of size 3!"});
-    }
-    for (size_t c = 0; c < 3; ++c) {
-      const rapidjson::Value& elemJson = rowJson[c];
-      if (!elemJson.IsDouble()) {
-        return tl::unexpected(Error{
-            ErrorCode::JSON_WRONG_NODE_TYPE,
-            "Element (" + std::to_string(r) + ", " + std::to_string(c) +
-            ") of array node is not a double!"});
+    const auto maybeRow = getDoubleArrayFromJson(json[r], 3);
+    if (maybeRow) {
+      for (size_t c = 0; c < 3; ++c) {
+        m.at<double>(r, c) = maybeRow.value()[c];
       }
-      m.at<double>(r, c) = elemJson.GetDouble();
+    } else {
+      return tl::unexpected(maybeRow.error());
     }
   }
   return m;
@@ -94,6 +82,17 @@ rapidjson::Value rect2dToJson(const cv::Rect2d& rect, JsonAlloc& allocator) {
   return val;
 }
 
+tl::expected<cv::Rect2d, Error> rect2dFromJson(const rapidjson::Value& json) {
+  cv::Rect2d r;
+  const auto maybeArr = getDoubleArrayFromJson(json, 4);
+  if (maybeArr) {
+    const std::vector<double> arr = maybeArr.value();
+    return cv::Rect2d(arr[0], arr[1], arr[2], arr[3]);
+  } else {
+    return tl::unexpected(maybeArr.error());
+  }
+}
+
 tl::expected<size_t, Error> getUintFromJsonChild(
     const rapidjson::Value& json,
     const std::string& fieldName) {
@@ -109,6 +108,27 @@ tl::expected<size_t, Error> getUintFromJsonChild(
           ErrorCode::JSON_MISSING_FIELD, fieldName + " field is missing!"
     });
   }
+}
+
+tl::expected<std::vector<double>, Error> getDoubleArrayFromJson(
+    const rapidjson::Value& json, size_t size) {
+  if (!json.IsArray()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "Node is not an array!"});
+  } else if (json.Size() != size) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_ARRAY_WRONG_SIZE, "Array is not of size " + std::to_string(size)});
+  }
+  std::vector<double> arr;
+  for (size_t i = 0; i < size; ++i) {
+    if (!json[i].IsDouble()) {
+      return tl::unexpected(Error{
+          ErrorCode::JSON_WRONG_NODE_TYPE,
+          "Element " + std::to_string(i) + " is not a double!"});
+    }
+    arr.push_back(json[i].GetDouble());
+  }
+  return arr;
 }
 
 }
