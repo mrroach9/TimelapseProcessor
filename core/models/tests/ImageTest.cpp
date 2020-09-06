@@ -9,7 +9,7 @@
 
 using namespace tlp;
 
-TEST(ImageTest, toJson) {
+TEST(ImageTest, TwoWayJsonConversion) {
   ImageMetadata meta;
   meta.width = 640;
   meta.height = 480;
@@ -20,10 +20,11 @@ TEST(ImageTest, toJson) {
   meta.iso = 100;
   meta.fStop = 5.6;
 
-  cv::Mat homo = cv::Mat::eye(3, 3, CV_32F);
+  cv::Mat homo = cv::Mat::eye(3, 3, CV_64F);
   Image image(123, "C:\\Test Path\\test image.jpg", homo, meta);
   rapidjson::Document d;
-  EXPECT_EQ(toString(image.toJson(d.GetAllocator()), true),
+  rapidjson::Value json = image.toJson(d.GetAllocator());
+  EXPECT_EQ(toString(json, true),
 R"Delim({
     "id": 123,
     "filepath": "C:\\Test Path\\test image.jpg",

@@ -18,7 +18,7 @@ TEST(ProjectTest, toJson) {
   meta.exposureUs = 5678;
   meta.iso = 100;
   meta.fStop = 5.6;
-  cv::Mat homo = cv::Mat::eye(3, 3, CV_32F);
+  cv::Mat homo = cv::Mat::eye(3, 3, CV_64F);
   Image image1(0, "C:\\Test Path\\image1.jpg", homo, meta);
   Image image2(1, "C:\\Test Path\\image2.jpg", homo, meta);
   

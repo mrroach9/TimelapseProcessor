@@ -5,8 +5,10 @@ cc_library(
     srcs = glob(["*.cpp"]),
     hdrs = glob(["*.h"]),
     deps = [
+      "//common:error",
       "//libs/opencv-4.4.0:opencv",
       "//libs/rapidjson-1.1.0:rapidjson",
+      "//libs/expected-1.0:expected",
     ],
 )
 

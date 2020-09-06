@@ -1,11 +1,13 @@
 #pragma once
 
+#include <common/Error.h>
 #include <models/TypeTraits.h>
 
 #include <chrono>
 #include <filesystem>
 #include <string>
 
+#include <tl/expected.hpp>
 #include <opencv2/core/mat.hpp>
 #include <rapidjson/document.h>
 
@@ -18,12 +20,12 @@ struct ImageMetadata {
   size_t nChannel;
 
   TimePoint timestamp;
-  int exposureUs;
-  int iso;
+  size_t exposureUs;
+  size_t iso;
   double fStop;
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
-  static ImageMetadata fromJson(const rapidjson::Value& json);
+  static tl::expected<ImageMetadata, Error> fromJson(const rapidjson::Value& json);
 };
 
 class Image {
@@ -36,7 +38,7 @@ public:
   Image() {}
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
-  static Image fromJson(const rapidjson::Value& json);
+  static tl::expected<Image, Error> fromJson(const rapidjson::Value& json);
 
   std::string filepath() const;
   size_t id() const;
