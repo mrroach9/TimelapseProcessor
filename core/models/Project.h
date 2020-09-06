@@ -1,10 +1,12 @@
 #pragma once
 
+#include <common/Error.h>
 #include <models/Image.h>
 #include <models/Timeline.h>
 #include <models/TypeTraits.h>
 
 #include <rapidjson/document.h>
+#include <tl/expected.hpp>
 
 #include <map>
 
@@ -23,7 +25,12 @@ enum class VideoResolution {
 };
 
 rapidjson::Value::StringRefType toStringRef(VideoEncoding o);
+tl::expected<VideoEncoding, Error> videoEncodingfromStringRef(
+    const rapidjson::Value::StringRefType& str);
+
 rapidjson::Value::StringRefType toStringRef(VideoResolution o);
+tl::expected<VideoResolution, Error> videoResolutionfromStringRef(
+    const rapidjson::Value::StringRefType& str);
 
 class Project {
 public:
@@ -39,6 +46,8 @@ public:
   rapidjson::Value toJson(JsonAlloc& allocator) const;
   static Project fromJson(const rapidjson::Value& json);
 
+  friend bool operator==(const Project& a, const Project& b);
+
 private:
   std::map<size_t, Image> _imagesById;
   std::map<std::string, Image> _imagesByFilepath;
@@ -47,5 +56,7 @@ private:
   VideoEncoding _exportEncoding;
   VideoResolution _exportResolution;
 };
+
+bool operator==(const Project& a, const Project& b);
 
 }

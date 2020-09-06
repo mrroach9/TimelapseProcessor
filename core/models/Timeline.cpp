@@ -1,5 +1,6 @@
 #include <models/Timeline.h>
 
+#include <common/Math.h>
 #include <models/Utils.h>
 
 namespace tlp {
@@ -15,9 +16,25 @@ rapidjson::Value::StringRefType toStringRef(InterpMethod m) {
     case InterpMethod::CUBIC:
       return "CUBIC";
     default:
-      // Unreachable.
       assert(false);
-      return "Unknown";
+      return "Unreachable";
+  }
+}
+
+tl::expected<InterpMethod, Error> interpMethodFromStringRef(
+    const rapidjson::Value::StringRefType& str) {
+  if (str == "NO_INTERP") {
+    return InterpMethod::NO_INTERP;
+  } else if (str == "LINEAR") {
+    return InterpMethod::LINEAR;
+  } else if (str == "QUADRATIC") {
+    return InterpMethod::QUADRATIC;
+  } else if (str == "CUBIC") {
+    return InterpMethod::CUBIC;
+  } else {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_ENUM_INVALID_VALUE,
+        "Invalid value for InterpMethod: " + std::string(str)});
   }
 }
 
@@ -34,6 +51,16 @@ rapidjson::Value Keyframe::toJson(JsonAlloc& allocator) const {
 Keyframe Keyframe::fromJson(const rapidjson::Value& json) {
   // TODO: Implement this.
   return Keyframe();
+}
+
+bool operator==(const Keyframe& a, const Keyframe& b) {
+  return a._interpMethod == b._interpMethod
+      && a._refImageId == b._refImageId
+      && double_eq(a._evDelta, b._evDelta)
+      && double_eq(a._cropRect.x, b._cropRect.x)
+      && double_eq(a._cropRect.y, b._cropRect.y)
+      && double_eq(a._cropRect.height, b._cropRect.height)
+      && double_eq(a._cropRect.width, b._cropRect.width);
 }
 
 rapidjson::Value Timeline::toJson(JsonAlloc& allocator) const {
@@ -66,6 +93,11 @@ int Timeline::addKeyframes(const std::vector<Keyframe>& keyframes) {
 int Timeline::addKeyframe(const Keyframe& keyframe) {
   // TODO: Implement this.
   return 0;
+}
+
+bool operator==(const Timeline& a, const Timeline& b) {
+  return std::equal(a._keyframes.begin(), a._keyframes.end(), b._keyframes.begin())
+      && std::equal(a._imagesById.begin(), a._imagesById.end(), b._imagesById.begin());
 }
 
 }

@@ -16,6 +16,19 @@ rapidjson::Value::StringRefType toStringRef(VideoEncoding o) {
   }
 }
 
+tl::expected<VideoEncoding, Error> videoEncodingfromStringRef(
+    const rapidjson::Value::StringRefType& str) {
+  if (str == "H264") {
+    return VideoEncoding::H264;
+  } else if (str == "SEQ_OF_IMAGES") {
+    return VideoEncoding::SEQ_OF_IMAGES;
+  } else {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_ENUM_INVALID_VALUE,
+        "Invalid value for VideoEncoding: " + std::string(str)});
+  }
+}
+
 rapidjson::Value::StringRefType toStringRef(VideoResolution o) {
   switch (o) {
     case VideoResolution::RES_480P:
@@ -29,6 +42,23 @@ rapidjson::Value::StringRefType toStringRef(VideoResolution o) {
     default:
       assert(false);
       return "Unreachable";
+  }
+}
+
+tl::expected<VideoResolution, Error> videoResolutionfromStringRef(
+    const rapidjson::Value::StringRefType& str) {
+  if (str == "480p") {
+    return VideoResolution::RES_480P;
+  } else if (str == "720p") {
+    return VideoResolution::RES_720P;
+  } else if (str == "1080p") {
+    return VideoResolution::RES_1080P;
+  } else if (str == "2160p") {
+    return VideoResolution::RES_2160P;
+  } else {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_ENUM_INVALID_VALUE,
+        "Invalid value for VideoResolution: " + std::string(str)});
   }
 }
 
@@ -67,6 +97,14 @@ rapidjson::Value Project::toJson(JsonAlloc& allocator) const {
 Project Project::fromJson(const rapidjson::Value& json) {
   // TODO: Implement it.
   return Project();
+}
+
+bool operator==(const Project& a, const Project& b) {
+  return a._projectName == b._projectName
+      && a._exportEncoding == b._exportEncoding
+      && a._exportResolution == b._exportResolution
+      && a._timeline == b._timeline
+      && std::equal(a._imagesById.begin(), a._imagesById.end(), b._imagesById.begin());
 }
 
 }

@@ -1,10 +1,12 @@
 #pragma once
 
+#include <common/Error.h>
 #include <models/Image.h>
 #include <models/TypeTraits.h>
 
 #include <opencv2/core/types.hpp>
 #include <rapidjson/document.h>
+#include <tl/expected.hpp>
  
 #include <chrono>
 #include <map>
@@ -21,6 +23,8 @@ enum class InterpMethod {
 };
 
 rapidjson::Value::StringRefType toStringRef(InterpMethod m);
+tl::expected<InterpMethod, Error> interpMethodFromStringRef(
+    const rapidjson::Value::StringRefType& str);
 
 class Keyframe {
 public:
@@ -39,6 +43,8 @@ public:
   rapidjson::Value toJson(JsonAlloc& allocator) const;
   static Keyframe fromJson(const rapidjson::Value& json);
 
+  friend bool operator==(const Keyframe& a, const Keyframe& b);
+
 private:
   size_t _refImageId;
   cv::Rect2d _cropRect;
@@ -47,6 +53,8 @@ private:
   // The first keyframe in a timeline must set this to NO_INTERP.
   InterpMethod _interpMethod; 
 };
+
+bool operator==(const Keyframe& a, const Keyframe& b);
 
 class Timeline {
 public:
@@ -62,6 +70,8 @@ public:
   int addKeyframes(const std::vector<Keyframe>& keyframes);
   int addKeyframe(const Keyframe& keyframe);
 
+  friend bool operator==(const Timeline& a, const Timeline& b);
+
 private:
   // A list of all imported images IDs keyed by their real time of shooting extracted
   // from EXIF.
@@ -73,5 +83,7 @@ private:
   // Cached all images by ids. The groundtruth should still be in Project.
   std::map<size_t, Image> _imagesById;
 };
+
+bool operator==(const Timeline& a, const Timeline& b);
 
 }
