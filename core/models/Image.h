@@ -44,6 +44,7 @@ public:
 
   std::string filepath() const;
   size_t id() const;
+  ImageMetadata metadata() const;
 
   friend bool operator==(const Image& a, const Image &b);
 

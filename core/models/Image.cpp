@@ -185,6 +185,10 @@ size_t Image::id() const {
   return _imageId;
 }
 
+ImageMetadata Image::metadata() const {
+  return _metadata;
+}
+
 bool operator==(const Image& a, const Image &b) {
   return a._imageId == b._imageId
       && a._filepath == b._filepath

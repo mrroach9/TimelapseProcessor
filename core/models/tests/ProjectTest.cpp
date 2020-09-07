@@ -22,8 +22,8 @@ TEST(ProjectTest, toJson) {
   Image image1(0, "C:\\Test Path\\image1.jpg", homo, meta);
   Image image2(1, "C:\\Test Path\\image2.jpg", homo, meta);
   
-  Keyframe k1(0, cv::Rect2d(1, 2, 3, 4), 0.0, InterpMethod::NO_INTERP);
-  Keyframe k2(1, cv::Rect2d(1, 2, 3, 4), 0.0, InterpMethod::CUBIC);
+  Keyframe k1{0, cv::Rect2d(1, 2, 3, 4), 0.0, InterpMethod::NO_INTERP};
+  Keyframe k2{1, cv::Rect2d(1, 2, 3, 4), 0.0, InterpMethod::CUBIC};
   Timeline timeline({k1, k2});
 
   Project project(

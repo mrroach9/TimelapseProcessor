@@ -10,6 +10,7 @@
  
 #include <chrono>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -25,32 +26,16 @@ enum class InterpMethod {
 rapidjson::Value::StringRefType toStringRef(InterpMethod m);
 tl::expected<InterpMethod, Error> interpMethodFromString(const std::string& str);
 
-class Keyframe {
-public:
-  // TODO: Delete these explicit constructors when parsing feature is added. Temporarily
-  // added for testing purpose.
-  Keyframe(size_t refImageId,
-      const cv::Rect2d& cropRect,
-      double evDelta,
-      InterpMethod interpMethod)
-      : _refImageId(refImageId),
-        _cropRect(cropRect),
-        _evDelta(evDelta),
-        _interpMethod(interpMethod) {}
-  Keyframe() {}
-
+struct Keyframe {
   rapidjson::Value toJson(JsonAlloc& allocator) const;
   static tl::expected<Keyframe, Error> fromJson(const rapidjson::Value& json);
 
-  friend bool operator==(const Keyframe& a, const Keyframe& b);
-
-private:
-  size_t _refImageId;
-  cv::Rect2d _cropRect;
-  double _evDelta;
+  size_t refImageId;
+  cv::Rect2d cropRect;
+  double evDelta;
   // Interpolation method between the previous keyframe and this one.
   // The first keyframe in a timeline must set this to NO_INTERP.
-  InterpMethod _interpMethod; 
+  InterpMethod interpMethod; 
 };
 
 bool operator==(const Keyframe& a, const Keyframe& b);
@@ -65,9 +50,10 @@ public:
   rapidjson::Value toJson(JsonAlloc& allocator) const;
   static tl::expected<Timeline, Error> fromJson(const rapidjson::Value& json);
 
-  int addImages(const std::vector<Image>& images);
-  int addKeyframes(const std::vector<Keyframe>& keyframes);
-  int addKeyframe(const Keyframe& keyframe);
+  std::optional<Error> addImage(const Image& image);
+  std::optional<Error> addImages(const std::vector<Image>& images);
+  std::optional<Error> addKeyframe(const Keyframe& keyframe);
+  std::optional<Error> addKeyframes(const std::vector<Keyframe>& keyframes);
 
   friend bool operator==(const Timeline& a, const Timeline& b);
 
@@ -77,9 +63,9 @@ private:
 
   // Temporary indices:
 
-  // A list of all imported images IDs keyed by their real time of shooting extracted
+  // A list of all imported images keyed by their real time of shooting extracted
   // from EXIF.
-  std::map<TimePoint, size_t> _imageIdsByTime;
+  std::map<TimePoint, std::vector<Image>> _imagesByTime;
   // A list of all keyframes keyed by their timestamp. Note that each keyframe
   // must reference to an input image, hence timestamp must be identical to 
   // an element in _images.
