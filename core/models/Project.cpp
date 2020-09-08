@@ -1,5 +1,6 @@
 #include <models/Project.h>
 
+#include <common/Utils.h>
 #include <models/Utils.h>
 
 namespace tlp {
@@ -92,9 +93,57 @@ rapidjson::Value Project::toJson(JsonAlloc& allocator) const {
   return val;
 }
 
-Project Project::fromJson(const rapidjson::Value& json) {
-  // TODO: Implement it.
-  return Project();
+tl::expected<Project, Error> Project::fromJson(const rapidjson::Value& json) {
+  Project project;
+  if (!json.IsObject()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "Project JSON node is not an object!"});
+  }
+  const auto maybeProjectName = getValueFromJsonChild<const char*>(json, "project_name");
+  const auto maybeExportEncoding =
+      getValueFromJsonChild<const char*>(json, "export_encoding")
+          .and_then(videoEncodingfromString);
+  const auto maybeExportResolution =
+      getValueFromJsonChild<const char*>(json, "export_resolution")
+          .and_then(videoResolutionfromString);
+  
+  tl::expected<Timeline, Error> maybeTimeline;
+  if (json.HasMember("timeline")) {
+    maybeTimeline = Timeline::fromJson(json["timeline"]);
+  } else {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_MISSING_FIELD, "timeline field is missing!"});
+  }
+
+  if (const auto maybeError = aggregateErrors(
+      maybeProjectName, maybeExportEncoding, maybeExportResolution, maybeTimeline)) {
+    return tl::unexpected(*maybeError);
+  }
+  project._projectName = maybeProjectName.value();
+  project._exportEncoding = maybeExportEncoding.value();
+  project._exportResolution = maybeExportResolution.value();
+  project._timeline = maybeTimeline.value();
+
+  if (!json.HasMember("images")) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_MISSING_FIELD, "images field is missing!"});
+  } else if (!json["images"].IsArray()) {
+    return tl::unexpected(Error{
+        ErrorCode::JSON_WRONG_NODE_TYPE, "images is not an array!"});
+  }
+  for (const auto& imageJson : json["images"].GetArray()) {
+    const auto maybeImage = Image::fromJson(imageJson);
+    if (maybeImage) {
+      const Image& image = maybeImage.value();
+      project._imagesById[image.id()] = image;
+      project._imagesByFilepath[image.filepath()] = image;
+      project._timeline.addImage(image);
+    } else {
+      return tl::unexpected(maybeImage.error());
+    }
+  }
+
+  return project;
 }
 
 bool operator==(const Project& a, const Project& b) {

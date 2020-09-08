@@ -34,7 +34,8 @@ TEST(ProjectTest, toJson) {
       timeline);
   
   rapidjson::Document d;
-  EXPECT_EQ(toString(project.toJson(d.GetAllocator()), true),
+  rapidjson::Value json = project.toJson(d.GetAllocator()); 
+  EXPECT_EQ(toString(json, true),
 R"Delim({
     "project_name": "Project",
     "export_encoding": "H264",
@@ -130,4 +131,7 @@ R"Delim({
         }
     ]
 })Delim");
+
+  const auto maybeOut = Project::fromJson(json);
+  EXPECT_EQ(maybeOut, project);
 }

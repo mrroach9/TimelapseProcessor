@@ -26,9 +26,24 @@ std::string toString(const rapidjson::Document& d, bool pretty = false);
 
 std::string toString(const rapidjson::Value& d, bool pretty = false);
 
-tl::expected<size_t, Error> getUintFromJsonChild(
+template <typename T>
+tl::expected<T, Error> getValueFromJsonChild(
     const rapidjson::Value& json,
-    const std::string& fieldName);
+    const std::string& fieldName) {
+  if (json.HasMember(fieldName.c_str())) {
+    const auto& child = json[fieldName.c_str()];
+    if (!child.Is<T>()) {
+      return tl::unexpected(Error{
+          ErrorCode::JSON_WRONG_NODE_TYPE,
+          fieldName + " is not of type " + typeid(T).name()});
+    }
+    return child.Get<T>();
+  } else {
+    return tl::unexpected(Error{
+          ErrorCode::JSON_MISSING_FIELD, fieldName + " field is missing!"
+    });
+  }
+}
 
 tl::expected<std::vector<double>, Error> getDoubleArrayFromJson(
     const rapidjson::Value& json,

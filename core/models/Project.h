@@ -42,7 +42,7 @@ public:
   Project() {}
 
   rapidjson::Value toJson(JsonAlloc& allocator) const;
-  static Project fromJson(const rapidjson::Value& json);
+  static tl::expected<Project, Error> fromJson(const rapidjson::Value& json);
 
   friend bool operator==(const Project& a, const Project& b);
 

@@ -11,3 +11,11 @@ cc_library(
     hdrs = ["Math.h"],
     deps = [],
 )
+
+cc_library(
+    name = "utils",
+    hdrs = ["Utils.h"],
+    deps = [
+      "//libs/expected-1.0:expected",
+    ],
+)

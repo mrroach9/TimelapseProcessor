@@ -7,6 +7,7 @@ cc_library(
     deps = [
       "//common:error",
       "//common:math",
+      "//common:utils",
       "//libs/opencv-4.4.0:opencv",
       "//libs/rapidjson-1.1.0:rapidjson",
       "//libs/expected-1.0:expected",

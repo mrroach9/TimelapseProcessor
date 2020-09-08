@@ -1,6 +1,7 @@
 #include <models/Timeline.h>
 
 #include <common/Math.h>
+#include <common/Utils.h>
 #include <models/Utils.h>
 
 namespace tlp {
@@ -54,57 +55,29 @@ tl::expected<Keyframe, Error> Keyframe::fromJson(const rapidjson::Value& json) {
         ErrorCode::JSON_WRONG_NODE_TYPE, "Keyframe JSON node is not an object!"});
   }
 
-  const auto maybeId = getUintFromJsonChild(json, "ref_image_id");
-  if (!maybeId) {
-    return tl::unexpected(maybeId.error());
-  } else {
-    keyframe.refImageId = maybeId.value();
-  }
+  const auto maybeId = getValueFromJsonChild<size_t>(json, "ref_image_id");
+  const auto maybeEvDelta = getValueFromJsonChild<double>(json, "ev_delta");
+  const auto maybeInterp =
+      getValueFromJsonChild<const char*>(json, "interp_method")
+          .and_then(interpMethodFromString);
 
+  tl::expected<cv::Rect2d, Error> maybeCropRect;
   if (json.HasMember("crop_rect")) {
-    const auto maybeCropRect = rect2dFromJson(json["crop_rect"]);
-    if (maybeCropRect) {
-      keyframe.cropRect = maybeCropRect.value();
-    } else {
-      return tl::unexpected(maybeCropRect.error());
-    }
+    maybeCropRect = rect2dFromJson(json["crop_rect"]);
   } else {
     return tl::unexpected(Error{
           ErrorCode::JSON_MISSING_FIELD, "crop_rect field is missing!"
     });
   }
 
-  if (json.HasMember("ev_delta")) {
-    const auto& evDeltaJson = json["ev_delta"];
-    if (evDeltaJson.IsDouble()) {
-      keyframe.evDelta = evDeltaJson.GetDouble();
-    } else {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, "ev_delta is not a double!"});
-    }
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, "ev_delta field is missing!"
-    });
+  if (const auto maybeError = aggregateErrors(maybeId, maybeEvDelta, maybeInterp)) {
+    return tl::unexpected(*maybeError);
   }
+  keyframe.refImageId = maybeId.value();
+  keyframe.evDelta = maybeEvDelta.value();
+  keyframe.interpMethod = maybeInterp.value();
+  keyframe.cropRect = maybeCropRect.value();
 
-  if (json.HasMember("interp_method")) {
-    const auto& interpMethodJson = json["interp_method"];
-    if (!interpMethodJson.IsString()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, "interp_method is not a string!"});
-    }
-    const auto maybeInterpMethod = interpMethodFromString(interpMethodJson.GetString());
-    if (maybeInterpMethod) {
-      keyframe.interpMethod = maybeInterpMethod.value();
-    } else {
-      return tl::unexpected(maybeInterpMethod.error());
-    }
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, "interp_method field is missing!"
-    });
-  }
   return keyframe;
 }
 

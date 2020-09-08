@@ -1,6 +1,7 @@
 #include <models/Image.h>
 
 #include <common/Math.h>
+#include <common/Utils.h>
 #include <models/Utils.h>
 
 #include <chrono>
@@ -30,73 +31,29 @@ tl::expected<ImageMetadata, Error> ImageMetadata::fromJson(const rapidjson::Valu
     return tl::unexpected(Error{
         ErrorCode::JSON_WRONG_NODE_TYPE, "ImageMetadata JSON node is not an object!"});
   }
-  const auto maybeWidth = getUintFromJsonChild(json, "width");
-  if (!maybeWidth) {
-    return tl::unexpected(maybeWidth.error());
-  } else {
-    meta.width = maybeWidth.value();
+  const auto maybeWidth = getValueFromJsonChild<size_t>(json, "width");
+  const auto maybeHeight = getValueFromJsonChild<size_t>(json, "height");
+  const auto maybeBitDepth = getValueFromJsonChild<size_t>(json, "bit_depth");
+  const auto maybeNChannel = getValueFromJsonChild<size_t>(json, "n_channel");
+  const auto maybeExposureUs = getValueFromJsonChild<size_t>(json, "exposure_us");
+  const auto maybeIso = getValueFromJsonChild<size_t>(json, "iso");
+  const auto maybeTimestamp = getValueFromJsonChild<uint64_t>(json, "timestamp_us");
+  const auto maybeFStop = getValueFromJsonChild<double>(json, "f_stop");
+
+  if (const auto maybeError = aggregateErrors(
+      maybeWidth, maybeHeight, maybeBitDepth, maybeNChannel,
+      maybeExposureUs, maybeIso, maybeTimestamp, maybeFStop)) {
+    return tl::unexpected(*maybeError);
   }
 
-  const auto maybeHeight = getUintFromJsonChild(json, "height");
-  if (!maybeHeight) {
-    return tl::unexpected(maybeHeight.error());
-  } else {
-    meta.height = maybeHeight.value();
-  }
-
-  const auto maybeBitDepth = getUintFromJsonChild(json, "bit_depth");
-  if (!maybeBitDepth) {
-    return tl::unexpected(maybeBitDepth.error());
-  } else {
-    meta.bitDepth = maybeBitDepth.value();
-  }
-
-  const auto maybeNChannel = getUintFromJsonChild(json, "n_channel");
-  if (!maybeNChannel) {
-    return tl::unexpected(maybeNChannel.error());
-  } else {
-    meta.nChannel = maybeNChannel.value();
-  }
-
-  const auto maybeExposureUs = getUintFromJsonChild(json, "exposure_us");
-  if (!maybeExposureUs) {
-    return tl::unexpected(maybeExposureUs.error());
-  } else {
-    meta.exposureUs = maybeExposureUs.value();
-  }
-
-  const auto maybeIso = getUintFromJsonChild(json, "iso");
-  if (!maybeIso) {
-    return tl::unexpected(maybeIso.error());
-  } else {
-    meta.iso = maybeIso.value();
-  }
-
-  if (json.HasMember("timestamp_us")) {
-    const auto& timestampJson = json["timestamp_us"];
-    if (!timestampJson.IsUint64()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, "timestamp_us is not a uint64!"});
-    }
-    meta.timestamp = TimePoint(chr::microseconds(timestampJson.GetUint64()));
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, "timestamp_us field is missing!"
-    });
-  }
-
-  if (json.HasMember("f_stop")) {
-    const auto& fStopJson = json["f_stop"];
-    if (!fStopJson.IsDouble()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, "f_stop is not a uint64!"});
-    }
-    meta.fStop = fStopJson.GetDouble();
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, "f-stop field is missing!"
-    });
-  }
+  meta.width = maybeWidth.value();
+  meta.height = maybeHeight.value();
+  meta.nChannel = maybeNChannel.value();
+  meta.bitDepth = maybeBitDepth.value();
+  meta.exposureUs = maybeExposureUs.value();
+  meta.iso = maybeIso.value();
+  meta.timestamp = TimePoint(chr::microseconds(maybeTimestamp.value()));
+  meta.fStop = maybeFStop.value();
   return meta;
 }
 
@@ -128,51 +85,35 @@ tl::expected<Image, Error> Image::fromJson(const rapidjson::Value& json) {
         ErrorCode::JSON_WRONG_NODE_TYPE, "Image JSON node is not an object!"});
   }
 
-  const auto maybeId = getUintFromJsonChild(json, "id");
-  if (!maybeId) {
-    return tl::unexpected(maybeId.error());
-  } else {
-    image._imageId = maybeId.value();
-  }
+  const auto maybeId = getValueFromJsonChild<size_t>(json, "id");
+  const auto maybeFilepath = getValueFromJsonChild<const char*>(json, "filepath");
 
-  if (json.HasMember("filepath")) {
-    const auto& filepathJson = json["filepath"];
-    if (!filepathJson.IsString()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, "filepath is not a string!"});
-    }
-    image._filepath = filepathJson.GetString();
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, "filepath field is missing!"
-    });
-  }
-
+  tl::expected<cv::Mat, Error> maybeAlignHomo;
   if (json.HasMember("align_homo")) {
-    const auto maybeAlignHomo = mat3dFromJson(json["align_homo"]);
-    if (maybeAlignHomo) {
-      image._alignHomo = maybeAlignHomo.value();
-    } else {
-      return tl::unexpected(maybeAlignHomo.error());
-    }
+    maybeAlignHomo = mat3dFromJson(json["align_homo"]);
   } else {
     return tl::unexpected(Error{
           ErrorCode::JSON_MISSING_FIELD, "align_homo field is missing!"
     });
   }
 
+  tl::expected<ImageMetadata, Error> maybeMeta;
   if (json.HasMember("metadata")) {
-    const auto maybeMeta = ImageMetadata::fromJson(json["metadata"]);
-    if (maybeMeta) {
-      image._metadata = maybeMeta.value();
-    } else {
-      return tl::unexpected(maybeMeta.error());
-    }
+    maybeMeta = ImageMetadata::fromJson(json["metadata"]);
   } else {
     return tl::unexpected(Error{
           ErrorCode::JSON_MISSING_FIELD, "metadata field is missing!"
     });
   }
+
+  if (const auto maybeError = aggregateErrors(
+      maybeId, maybeFilepath, maybeAlignHomo, maybeMeta)) {
+    return tl::unexpected(*maybeError);
+  }
+  image._imageId = maybeId.value();
+  image._filepath = maybeFilepath.value();
+  image._alignHomo = maybeAlignHomo.value();
+  image._metadata = maybeMeta.value();
 
   return image;
 }

@@ -93,23 +93,6 @@ tl::expected<cv::Rect2d, Error> rect2dFromJson(const rapidjson::Value& json) {
   }
 }
 
-tl::expected<size_t, Error> getUintFromJsonChild(
-    const rapidjson::Value& json,
-    const std::string& fieldName) {
-  if (json.HasMember(fieldName.c_str())) {
-    const auto& child = json[fieldName.c_str()];
-    if (!child.IsUint()) {
-      return tl::unexpected(Error{
-          ErrorCode::JSON_WRONG_NODE_TYPE, fieldName + " is not a uint!"});
-    }
-    return child.GetUint();
-  } else {
-    return tl::unexpected(Error{
-          ErrorCode::JSON_MISSING_FIELD, fieldName + " field is missing!"
-    });
-  }
-}
-
 tl::expected<std::vector<double>, Error> getDoubleArrayFromJson(
     const rapidjson::Value& json, size_t size) {
   if (!json.IsArray()) {
