@@ -14,3 +14,7 @@ third-party
 
 # Bazel temp files
 bazel-*
+
+# Node.js
+node_modules/
+jspm_packages/

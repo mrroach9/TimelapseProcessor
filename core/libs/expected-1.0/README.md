@@ -1,5 +1,5 @@
 This folder contains a precompiled library of
-[expected](https://github.com/TartanLlama/expected v1.0. It's a header-only lib and supports
+[expected](https://github.com/TartanLlama/expected) v1.0. It's a header-only lib and supports
 all platforms.
 
 ## Prerequisites
