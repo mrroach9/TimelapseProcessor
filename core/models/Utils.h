@@ -16,8 +16,6 @@ rapidjson::Value mat3dToJson(const cv::Mat& mat, JsonAlloc& allocator);
 
 tl::expected<cv::Mat, Error> mat3dFromJson(const rapidjson::Value& json);
 
-rapidjson::Value::StringRefType toStringRef(const std::string& str);
-
 rapidjson::Value rect2dToJson(const cv::Rect2d& rect, JsonAlloc& allocator);
 
 tl::expected<cv::Rect2d, Error> rect2dFromJson(const rapidjson::Value& json);

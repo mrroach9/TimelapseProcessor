@@ -24,10 +24,10 @@ enum class VideoResolution {
   RES_2160P
 };
 
-rapidjson::Value::StringRefType toStringRef(VideoEncoding o);
+std::string toString(VideoEncoding o);
 tl::expected<VideoEncoding, Error> videoEncodingfromString(const std::string& str);
 
-rapidjson::Value::StringRefType toStringRef(VideoResolution o);
+std::string toString(VideoResolution o);
 tl::expected<VideoResolution, Error> videoResolutionfromString(const std::string& str);
 
 class Project {

@@ -7,4 +7,7 @@ cc_library(
       "include/**/*.hpp",
     ]),
     strip_include_prefix = "include",
+    defines = [
+      "RAPIDJSON_HAS_STDSTRING=1",
+    ]
 )

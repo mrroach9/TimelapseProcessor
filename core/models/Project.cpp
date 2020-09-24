@@ -5,7 +5,7 @@
 
 namespace tlp {
 
-rapidjson::Value::StringRefType toStringRef(VideoEncoding o) {
+std::string toString(VideoEncoding o) {
   switch (o) {
     case VideoEncoding::H264:
       return "H264";
@@ -29,7 +29,7 @@ tl::expected<VideoEncoding, Error> videoEncodingfromString(const std::string& st
   }
 }
 
-rapidjson::Value::StringRefType toStringRef(VideoResolution o) {
+std::string toString(VideoResolution o) {
   switch (o) {
     case VideoResolution::RES_480P:
       return "480p";
@@ -85,9 +85,9 @@ rapidjson::Value Project::toJson(JsonAlloc& allocator) const {
 
   rapidjson::Value val;
   val.SetObject()
-      .AddMember("project_name", toStringRef(_projectName), allocator)
-      .AddMember("export_encoding", toStringRef(_exportEncoding), allocator)
-      .AddMember("export_resolution", toStringRef(_exportResolution), allocator)
+      .AddMember("project_name", _projectName, allocator)
+      .AddMember("export_encoding", toString(_exportEncoding), allocator)
+      .AddMember("export_resolution", toString(_exportResolution), allocator)
       .AddMember("timeline", _timeline.toJson(allocator), allocator)
       .AddMember("images", imagesJson, allocator);
   return val;
@@ -99,12 +99,12 @@ tl::expected<Project, Error> Project::fromJson(const rapidjson::Value& json) {
     return tl::unexpected(Error{
         ErrorCode::JSON_WRONG_NODE_TYPE, "Project JSON node is not an object!"});
   }
-  const auto maybeProjectName = getValueFromJsonChild<const char*>(json, "project_name");
+  const auto maybeProjectName = getValueFromJsonChild<std::string>(json, "project_name");
   const auto maybeExportEncoding =
-      getValueFromJsonChild<const char*>(json, "export_encoding")
+      getValueFromJsonChild<std::string>(json, "export_encoding")
           .and_then(videoEncodingfromString);
   const auto maybeExportResolution =
-      getValueFromJsonChild<const char*>(json, "export_resolution")
+      getValueFromJsonChild<std::string>(json, "export_resolution")
           .and_then(videoResolutionfromString);
   
   tl::expected<Timeline, Error> maybeTimeline;

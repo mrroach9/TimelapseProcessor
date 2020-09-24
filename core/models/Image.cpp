@@ -72,7 +72,7 @@ rapidjson::Value Image::toJson(JsonAlloc& allocator) const {
   rapidjson::Value val;
   val.SetObject()
       .AddMember("id", _imageId, allocator)
-      .AddMember("filepath", toStringRef(_filepath), allocator)
+      .AddMember("filepath", _filepath, allocator)
       .AddMember("align_homo", mat3dToJson(_alignHomo, allocator), allocator)
       .AddMember("metadata", _metadata.toJson(allocator), allocator);
   return val;
@@ -86,7 +86,7 @@ tl::expected<Image, Error> Image::fromJson(const rapidjson::Value& json) {
   }
 
   const auto maybeId = getValueFromJsonChild<size_t>(json, "id");
-  const auto maybeFilepath = getValueFromJsonChild<const char*>(json, "filepath");
+  const auto maybeFilepath = getValueFromJsonChild<std::string>(json, "filepath");
 
   tl::expected<cv::Mat, Error> maybeAlignHomo;
   if (json.HasMember("align_homo")) {
@@ -128,6 +128,10 @@ size_t Image::id() const {
 
 ImageMetadata Image::metadata() const {
   return _metadata;
+}
+
+cv::Mat Image::alignHomo() const {
+  return _alignHomo;
 }
 
 bool operator==(const Image& a, const Image &b) {

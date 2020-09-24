@@ -44,10 +44,6 @@ tl::expected<cv::Mat, Error> mat3dFromJson(const rapidjson::Value& json) {
   return m;
 }
 
-rapidjson::Value::StringRefType toStringRef(const std::string& str) {
-  return rapidjson::StringRef(str.c_str());
-}
-
 std::string toString(const rapidjson::Document& d, bool pretty) {
   rapidjson::StringBuffer buffer;
   if (pretty) {

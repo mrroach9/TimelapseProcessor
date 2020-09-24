@@ -58,7 +58,7 @@ tl::expected<Keyframe, Error> Keyframe::fromJson(const rapidjson::Value& json) {
   const auto maybeId = getValueFromJsonChild<size_t>(json, "ref_image_id");
   const auto maybeEvDelta = getValueFromJsonChild<double>(json, "ev_delta");
   const auto maybeInterp =
-      getValueFromJsonChild<const char*>(json, "interp_method")
+      getValueFromJsonChild<std::string>(json, "interp_method")
           .and_then(interpMethodFromString);
 
   tl::expected<cv::Rect2d, Error> maybeCropRect;
