@@ -23,7 +23,7 @@ enum class InterpMethod {
   CUBIC,
 };
 
-rapidjson::Value::StringRefType toStringRef(InterpMethod m);
+std::string toStringRef(InterpMethod m);
 tl::expected<InterpMethod, Error> interpMethodFromString(const std::string& str);
 
 struct Keyframe {

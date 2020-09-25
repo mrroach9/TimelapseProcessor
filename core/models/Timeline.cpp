@@ -6,7 +6,7 @@
 
 namespace tlp {
 
-rapidjson::Value::StringRefType toStringRef(InterpMethod m) {
+std::string toString(InterpMethod m) {
   switch (m) {
     case InterpMethod::NO_INTERP:
       return "NO_INTERP";
@@ -44,7 +44,7 @@ rapidjson::Value Keyframe::toJson(JsonAlloc& allocator) const {
       .AddMember("ref_image_id", refImageId, allocator)
       .AddMember("crop_rect", rect2dToJson(cropRect, allocator), allocator)
       .AddMember("ev_delta", evDelta, allocator)
-      .AddMember("interp_method", toStringRef(interpMethod), allocator);
+      .AddMember("interp_method", toString(interpMethod), allocator);
   return val;
 }
 
